@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from app.tasks.video_tasks import generate_video_task
 from celery.result import AsyncResult
+from app.services.trend_scraper import get_trending_topics
 
 router = APIRouter(prefix="/api", tags=["video"])
 
@@ -44,3 +45,38 @@ async def get_job_status(job_id: str):
         return {"status": "failed", "error": str(task.info)}
     
     return {"status": task.state}
+
+@router.get("/trending-topics/{niche}")
+async def get_trending(niche: str = "teknologi"):
+    topics = get_trending_topics(niche)
+    return {
+        "niche": niche,
+        "count": len(topics),
+        "topics": topics[:5]
+    }
+
+@router.post("/generate-from-trending/{niche}")
+async def generate_from_trending(niche: str = "teknologi"):
+    """
+    Auto-generate video dari topik trending.
+    Ambil topik #1 yang trending, buat video langsung.
+    """
+    topics = get_trending_topics(niche)
+    
+    if not topics:
+        return {"status": "error", "message": "Tidak ada topik trending ditemukan"}
+    
+    # Pakai topik paling trending (index 0)
+    selected_topic = topics[0]["topic"]
+    
+    task = generate_video_task.delay(
+        topic=selected_topic,
+        niche=niche
+    )
+    
+    return {
+        "status": "processing",
+        "job_id": task.id,
+        "topic": selected_topic,
+        "message": "Video sedang diproses dari topik trending"
+    }
