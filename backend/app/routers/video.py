@@ -1,13 +1,7 @@
-from fastapi import APIRouter, BackgroundTasks
+from fastapi import APIRouter
 from pydantic import BaseModel
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from services.script_generator import generate_script
-from services.tts_service import generate_audio
-from services.footage_fetcher import get_footage_per_segment
-from services.video_assembler import assemble_video
+from app.tasks.video_tasks import generate_video_task
+from celery.result import AsyncResult
 
 router = APIRouter(prefix="/api", tags=["video"])
 
@@ -15,45 +9,38 @@ class VideoRequest(BaseModel):
     topic: str
     niche: str = "teknologi"
 
-class VideoResponse(BaseModel):
-    status: str
-    title: str
-    hashtags: list
-    video_url: str
-
-@router.post("/generate-video", response_model=VideoResponse)
+@router.post("/generate-video")
 async def generate_video(request: VideoRequest):
-    import uuid
-    job_id = str(uuid.uuid4())[:8]
-    output_dir = f"outputs/{job_id}"
-    
-    # Step 1: Generate script
-    script = generate_script(topic=request.topic, niche=request.niche)
-    
-    # Step 2: Generate audio
-    audio_path = generate_audio(
-        text=script['full_script'],
-        output_path=f"{output_dir}/audio.mp3"
+    task = generate_video_task.delay(
+        topic=request.topic,
+        niche=request.niche
     )
+    return {
+        "status": "processing",
+        "job_id": task.id,
+        "message": "Video sedang diproses di background"
+    }
+
+@router.get("/job-status/{job_id}")
+async def get_job_status(job_id: str):
+    task = AsyncResult(job_id)
     
-    # Step 3: Download footage
-    footage_paths = get_footage_per_segment(
-        footage_keywords=script['footage_keywords'],
-        output_dir=f"{output_dir}/footage"
-    )
+    if task.state == "PENDING":
+        return {"status": "pending", "step": "Menunggu diproses..."}
     
-    # Step 4: Assemble video
-    video_path = assemble_video(
-        footage_paths=footage_paths,
-        audio_path=audio_path,
-        output_path=f"{output_dir}/final.mp4",
-        script_text=script['full_script'],
-        target_duration=60
-    )
+    elif task.state == "PROGRESS":
+        return {"status": "processing", "step": task.info.get("step", "")}
     
-    return VideoResponse(
-        status="success",
-        title=script['title'],
-        hashtags=script['hashtags'],
-        video_url=f"/outputs/{job_id}/final.mp4"
-    )
+    elif task.state == "SUCCESS":
+        result = task.result
+        return {
+            "status": "success",
+            "title": result["title"],
+            "hashtags": result["hashtags"],
+            "video_url": result["video_url"]
+        }
+    
+    elif task.state == "FAILURE":
+        return {"status": "failed", "error": str(task.info)}
+    
+    return {"status": task.state}
