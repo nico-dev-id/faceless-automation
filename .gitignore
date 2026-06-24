@@ -16,3 +16,7 @@ frontend/.next/
 
 # General
 .DS_Store
+
+# Output videos
+backend/outputs/
+backend/test_output/
