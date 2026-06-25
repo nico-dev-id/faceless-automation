@@ -21,11 +21,19 @@ Bahasa: Indonesia (casual, engaging, mudah dipahami)
 
 Script harus terdiri dari:
 1. INTRO (10 detik): HOOK yang membuat orang BERHENTI SCROLL. 
-   Gunakan salah satu teknik ini:
-   - Fakta mengejutkan: "90% orang tidak tahu bahwa..."
-   - Pertanyaan provokatif: "Kamu mau digantikan robot tahun depan?"
-   - Pernyataan kontroversial: "Kuliah 4 tahun akan sia-sia karena ini..."
-   - Angka spesifik: "5 pekerjaan ini akan hilang dalam 2 tahun!"
+   Gunakan salah satu teknik ini (VARIASI SETIAP KALI):
+   
+   Teknik 1 - Fakta mengejutkan: "X% orang tidak tahu bahwa..."
+   Teknik 2 - Pertanyaan provokatif: "Kamu mau [outcome negatif] tahun depan?"
+   Teknik 3 - Pernyataan kontroversial: "[Klaim berani] akan sia-sia karena..."
+   Teknik 4 - Angka spesifik: "X pekerjaan/hal ini akan berubah dalam Y tahun!"
+   Teknik 5 - Scenario relatable: "Pernah merasa [frustasi umum]? Ini solusinya..."
+   Teknik 6 - Challenge/Dare: "Saya rasa kamu tidak bisa [achievement]"
+   Teknik 7 - Breaking news style: "BREAKING: [Topik] baru saja terbukti [hal besar]"
+   Teknik 8 - Benefit teaser: "Sebelum video habis, kamu bakal tahu cara [benefit spesifik]"
+   
+   PENTING: Pilih teknik yang BERBEDA setiap kali, jangan selalu yang sama!
+   Jangan gunakan "90% orang tidak tahu" lebih dari 1x dalam 10 request terakhir.
    Hook HARUS di kalimat PERTAMA, langsung to the point, tanpa basa-basi.
 
 2. ISI (40 detik): Informasi yang MENGEJUTKAN dan SPESIFIK.
